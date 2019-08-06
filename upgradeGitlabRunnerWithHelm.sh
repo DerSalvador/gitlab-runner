@@ -2,7 +2,7 @@
 shopt -u extglob; set +H
 kubectl config get-contexts
 echo "Current k8s context $(kubectl config current-context)"
-read -p "Want to add gitlab runner to current context (y/n)? " yesno
+read -p "Want to add gitlab runner to current kubernetes cluster (y/n)? " yesno
 if [ "$yesno" == "y" ]; then
 	kubectl create namespace gitlab-runner
 	./k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system michael.roepke@filekeys.com tiller
@@ -12,7 +12,7 @@ if [ "$yesno" == "y" ]; then
 	helm repo add gitlab https://charts.gitlab.io
 	helm init --service-account tiller 
 	helm ls
-	helm install --namespace gitlab-runner --name gitlab-runner -f ./values.yaml  gitlab/gitlab-runner
+    helm upgrade --namespace gitlab-runner -f ./values.yaml gitlab-runner gitlab/gitlab-runner
 else
 	echo "No Joy"
 fi

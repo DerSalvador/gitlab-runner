@@ -1,0 +1,3 @@
+resources:
+  - dotnet-repo-pvc.yaml
+  - gitlab-runner.helm.rendered.template

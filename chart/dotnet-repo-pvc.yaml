@@ -1,0 +1,19 @@
+{
+  "kind": "PersistentVolumeClaim",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "dotnet-repo"
+  },
+  "spec": {
+    "accessModes": [
+      "ReadWriteOnce"
+    ],
+    "resources": {
+      "requests": {
+        "storage": "10M"
+      }
+    },
+    "storageClassName": "standard",
+    "volumeMode": "Filesystem"
+  }
+}

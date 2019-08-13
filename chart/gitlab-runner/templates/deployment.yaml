@@ -43,6 +43,9 @@ spec:
         - name: init-runner-secrets
           mountPath: /init-secrets
           readOnly: true
+        - name: dotnet-repo
+          mountPath: /dotnet-repo
+          readOnly: false
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       serviceAccountName: {{ if .Values.rbac.create }}{{ include "gitlab-runner.fullname" . }}{{ else }}"{{ .Values.rbac.serviceAccountName }}"{{ end }}
@@ -93,6 +96,9 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       volumes:
+      - name: dotnet-repo
+        emptyDir:
+          medium: "Disk"
       - name: runner-secrets
         emptyDir:
           medium: "Memory"

@@ -1,0 +1,3 @@
+ [
+   {"op": "add", "path": "/spec/template/spec/volumes/0/name", "value": "dotnet-repo"}
+ ]

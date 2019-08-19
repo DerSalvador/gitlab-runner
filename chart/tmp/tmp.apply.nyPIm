@@ -1,30 +1,22 @@
----
-# Source: gitlab-runner/templates/secrets.yaml
 apiVersion: v1
-kind: Secret
-metadata:
-  name: "gitlab-runner-gitlab-runner"
-  labels:
-    app: gitlab-runner-gitlab-runner
-    chart: gitlab-runner-0.7.0
-    release: "gitlab-runner"
-    heritage: "Tiller"
-type: Opaque
 data:
-  runner-registration-token: "eWFjQUhRNzJFZHJEaTFyLWN6c3I="
-  runner-token: ""
----
-# Source: gitlab-runner/templates/configmap.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: gitlab-runner-gitlab-runner
-  labels:
-    app: gitlab-runner-gitlab-runner
-    chart: gitlab-runner-0.7.0
-    release: "gitlab-runner"
-    heritage: "Tiller"
-data:
+  check-live: |
+    #!/bin/bash
+    if /usr/bin/pgrep -f .*register-the-runner; then
+      exit 0
+    elif /usr/bin/pgrep gitlab.*runner; then
+      exit 0
+    else
+      exit 1
+    fi
+  config.toml: |
+    concurrent = 10
+    check_interval = 30
+    log_level = "info"
+    listen_address = '[::]:9252'
+  configure: |
+    set -e
+    cp /init-secrets/* /secrets
   entrypoint: |
     #!/bin/bash
     set -e
@@ -62,100 +54,79 @@ data:
     # Start the runner
     /entrypoint run --user=gitlab-runner \
       --working-directory=/home/gitlab-runner
-
-  config.toml: |
-    concurrent = 10
-    check_interval = 30
-    log_level = "info"
-    listen_address = '[::]:9252'
-  configure: |
-    set -e
-    cp /init-secrets/* /secrets
-  register-the-runner: |
-    #!/bin/bash
-    MAX_REGISTER_ATTEMPTS=30
-
-    for i in $(seq 1 "${MAX_REGISTER_ATTEMPTS}"); do
-      echo "Registration attempt ${i} of ${MAX_REGISTER_ATTEMPTS}"
-      /entrypoint register \
-        --non-interactive
-
-      retval=$?
-
-      if [ ${retval} = 0 ]; then
-        break
-      elif [ ${i} = ${MAX_REGISTER_ATTEMPTS} ]; then
-        exit 1
-      fi
-
-      sleep 5 
-    done
-
-    exit 0
-
-  check-live: |
-    #!/bin/bash
-    if /usr/bin/pgrep -f .*register-the-runner; then
-      exit 0
-    elif /usr/bin/pgrep gitlab.*runner; then
-      exit 0
-    else
-      exit 1
-    fi
-
----
-# Source: gitlab-runner/templates/deployment.yaml
-apiVersion: extensions/v1beta1
-kind: Deployment
+  register-the-runner: "#!/bin/bash\nMAX_REGISTER_ATTEMPTS=30\n\nfor i in $(seq 1
+    \"${MAX_REGISTER_ATTEMPTS}\"); do\n  echo \"Registration attempt ${i} of ${MAX_REGISTER_ATTEMPTS}\"\n
+    \ /entrypoint register \\\n    --non-interactive\n\n  retval=$?\n\n  if [ ${retval}
+    = 0 ]; then\n    break\n  elif [ ${i} = ${MAX_REGISTER_ATTEMPTS} ]; then\n    exit
+    1\n  fi\n\n  sleep 5 \ndone\n\nexit 0\n"
+kind: ConfigMap
 metadata:
-  name: gitlab-runner-gitlab-runner
   labels:
     app: gitlab-runner-gitlab-runner
     chart: gitlab-runner-0.7.0
-    release: "gitlab-runner"
-    heritage: "Tiller"
-    type: "deployment"
+    heritage: Tiller
+    release: gitlab-runner
+  name: gitlab-runner-gitlab-runner
+---
+apiVersion: v1
+data:
+  runner-registration-token: eWFjQUhRNzJFZHJEaTFyLWN6c3I=
+  runner-token: ""
+kind: Secret
+metadata:
+  labels:
+    app: gitlab-runner-gitlab-runner
+    chart: gitlab-runner-0.7.0
+    heritage: Tiller
+    release: gitlab-runner
+  name: gitlab-runner-gitlab-runner
+type: Opaque
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: gitlab-runner-gitlab-runner
+    chart: gitlab-runner-0.7.0
+    heritage: Tiller
+    release: gitlab-runner
+    type: deployment
+  name: gitlab-runner-gitlab-runner
 spec:
   replicas: 1
   template:
     metadata:
-      labels:
-        app: gitlab-runner-gitlab-runner
       annotations:
         checksum/configmap: c0a2bc3dca47b5a3a4f6177d06f7b70757d26f81b11aa5f4f7aa969623679c46
         checksum/secrets: 6c141f75876caff92546b1e72a48eb3b14baa278c7a2d71f42563cd0cdf43e99
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9252'
+        prometheus.io/port: "9252"
+        prometheus.io/scrape: "true"
+      labels:
+        app: gitlab-runner-gitlab-runner
     spec:
-      securityContext:
-        runAsUser: 100
-        fsGroup: 65533
-      initContainers:
-      - name: configure
-        command: ['sh', '/config/configure']
-        image: gitlab/gitlab-runner:alpine-v12.1.0
+      containers:
+      - command:
+        - /bin/bash
+        - /scripts/entrypoint
         env:
-                
         - name: CI_SERVER_URL
-          value: "https://gitlab.hce.heidelbergcement.com/"
+          value: https://gitlab.hce.heidelbergcement.com/
         - name: CLONE_URL
           value: ""
         - name: RUNNER_REQUEST_CONCURRENCY
           value: "1"
         - name: RUNNER_EXECUTOR
-          value: "kubernetes"
+          value: kubernetes
         - name: REGISTER_LOCKED
           value: "true"
         - name: RUNNER_TAG_LIST
           value: ""
         - name: KUBERNETES_IMAGE
-          value: "ubuntu:16.04"
-        
+          value: ubuntu:16.04
         - name: KUBERNETES_PRIVILEGED
           value: "true"
-        
         - name: KUBERNETES_NAMESPACE
-          value: "gitlab-runner"
+          value: gitlab-runner
         - name: KUBERNETES_CPU_LIMIT
           value: ""
         - name: KUBERNETES_MEMORY_LIMIT
@@ -186,54 +157,70 @@ spec:
           value: ""
         - name: KUBERNETES_PULL_POLICY
           value: ""
-        volumeMounts:
-        - name: runner-secrets
-          mountPath: /secrets
-          readOnly: false
-        - name: scripts
-          mountPath: /config
-          readOnly: true
-        - name: init-runner-secrets
-          mountPath: /init-secrets
-          readOnly: true
-        - name: dotnet-repo
-          mountPath: /dotnet-repo
-          readOnly: false
-        resources:
-          {}
-          
-      serviceAccountName: ""
-      containers:
-      - name: gitlab-runner-gitlab-runner
         image: gitlab/gitlab-runner:alpine-v12.1.0
+        imagePullPolicy: IfNotPresent
         lifecycle:
           preStop:
             exec:
-              command: ["gitlab-runner", "unregister", "--all-runners"]
-        imagePullPolicy: "IfNotPresent"
-        command: ["/bin/bash", "/scripts/entrypoint"]
+              command:
+              - gitlab-runner
+              - unregister
+              - --all-runners
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - /scripts/check-live
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: gitlab-runner-gitlab-runner
+        ports:
+        - containerPort: 9252
+          name: metrics
+        readinessProbe:
+          exec:
+            command:
+            - /usr/bin/pgrep
+            - gitlab.*runner
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        volumeMounts:
+        - mountPath: /secrets
+          name: runner-secrets
+        - mountPath: /home/gitlab-runner/.gitlab-runner
+          name: etc-gitlab-runner
+        - mountPath: /scripts
+          name: scripts
+      initContainers:
+      - command:
+        - sh
+        - /config/configure
         env:
-                
         - name: CI_SERVER_URL
-          value: "https://gitlab.hce.heidelbergcement.com/"
+          value: https://gitlab.hce.heidelbergcement.com/
         - name: CLONE_URL
           value: ""
         - name: RUNNER_REQUEST_CONCURRENCY
           value: "1"
         - name: RUNNER_EXECUTOR
-          value: "kubernetes"
+          value: kubernetes
         - name: REGISTER_LOCKED
           value: "true"
         - name: RUNNER_TAG_LIST
           value: ""
         - name: KUBERNETES_IMAGE
-          value: "ubuntu:16.04"
-        
+          value: ubuntu:16.04
         - name: KUBERNETES_PRIVILEGED
           value: "true"
-        
         - name: KUBERNETES_NAMESPACE
-          value: "gitlab-runner"
+          value: gitlab-runner
         - name: KUBERNETES_CPU_LIMIT
           value: ""
         - name: KUBERNETES_MEMORY_LIMIT
@@ -264,65 +251,59 @@ spec:
           value: ""
         - name: KUBERNETES_PULL_POLICY
           value: ""
-        livenessProbe:
-          exec:
-            command: ["/bin/bash", "/scripts/check-live"]
-          initialDelaySeconds: 60
-          timeoutSeconds: 1
-          periodSeconds: 10
-          successThreshold: 1
-          failureThreshold: 3
-        readinessProbe:
-          exec:
-            command: ["/usr/bin/pgrep","gitlab.*runner"]
-          initialDelaySeconds: 10
-          timeoutSeconds: 1
-          periodSeconds: 10
-          successThreshold: 1
-          failureThreshold: 3
-        ports:
-        - name: metrics
-          containerPort: 9252
+        image: gitlab/gitlab-runner:alpine-v12.1.0
+        name: configure
+        resources: {}
         volumeMounts:
-        - name: runner-secrets
-          mountPath: /secrets
-        - name: etc-gitlab-runner
-          mountPath: /home/gitlab-runner/.gitlab-runner
-        - name: scripts
-          mountPath: /scripts
-        resources:
-          {}
-          
+        - mountPath: /secrets
+          name: runner-secrets
+          readOnly: false
+        - mountPath: /config
+          name: scripts
+          readOnly: true
+        - mountPath: /init-secrets
+          name: init-runner-secrets
+          readOnly: true
+        - mountPath: /dotnet-repo
+          name: dotnet-repo
+          readOnly: false
+      securityContext:
+        fsGroup: 65533
+        runAsUser: 100
+      serviceAccountName: ""
       volumes:
-      - name: dotnet-repo
-        emptyDir:
-          medium: "Disk"
-      - name: runner-secrets
-        emptyDir:
-          medium: "Memory"
-      - name: etc-gitlab-runner
-        emptyDir:
-          medium: "Memory"
+      - emptyDir:
+          medium: Disk
+        name: dotnet-repo
+      - emptyDir:
+          medium: Memory
+        name: runner-secrets
+      - emptyDir:
+          medium: Memory
+        name: etc-gitlab-runner
       - name: init-runner-secrets
         projected:
           sources:
-            - secret:
-                name: "gitlab-runner-gitlab-runner"
-                items:
-                  - key: runner-registration-token
-                    path: runner-registration-token
-                  - key: runner-token
-                    path: runner-token
-      - name: scripts
-        configMap:
+          - secret:
+              items:
+              - key: runner-registration-token
+                path: runner-registration-token
+              - key: runner-token
+                path: runner-token
+              name: gitlab-runner-gitlab-runner
+      - configMap:
           name: gitlab-runner-gitlab-runner
-
+        name: scripts
 ---
-# Source: gitlab-runner/templates/role-binding.yaml
-
----
-# Source: gitlab-runner/templates/role.yaml
-
----
-# Source: gitlab-runner/templates/service-account.yaml
-
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dotnet-repo
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  storageClassName: standard
+  volumeMode: Filesystem

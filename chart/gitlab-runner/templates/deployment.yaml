@@ -96,9 +96,6 @@ spec:
       - name: runner-secrets
         emptyDir:
           medium: "Memory"
-      - name: dotnet-repo
-        emptyDir:
-          medium: "Disk"
       - name: etc-gitlab-runner
         emptyDir:
           medium: "Memory"

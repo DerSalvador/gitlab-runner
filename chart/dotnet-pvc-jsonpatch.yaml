@@ -1,5 +1,5 @@
  [
-   {"op": "add", "path": "/spec/template/spec/volumes/0", "value": {"emptyDir": { "medium": "Disk"}, "name": "dotnet-pro" } }
+   {"op": "add", "path": "/spec/template/spec/volumes/-", "value": {"emptyDir": { "medium": "Disk"}, "name": "dotnet-pro" } }
  ]
 
  #- op: add

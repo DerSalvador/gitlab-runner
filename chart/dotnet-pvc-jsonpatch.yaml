@@ -1,3 +1,11 @@
  [
-   {"op": "add", "path": "/spec/template/spec/volumes/0/name", "value": "dotnet-repo"}
+   {"op": "add", "path": "/spec/template/spec/volumes/-", "value": {"emptyDir": { "medium": "Disk"}, "name": "dotnet-repo" } }
  ]
+
+ #- op: add
+ # path: /spec/template/spec/volumes
+ # value:
+ #   path: 'emptyDir'
+ #   backend:
+ #     serviceName: my-test
+ #     servicePort: 8081

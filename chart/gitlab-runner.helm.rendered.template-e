@@ -114,7 +114,6 @@ metadata:
     chart: gitlab-runner-0.7.0
     release: "gitlab-runner"
     heritage: "Tiller"
-    type: "deployment"
 spec:
   replicas: 1
   template:
@@ -196,9 +195,6 @@ spec:
         - name: init-runner-secrets
           mountPath: /init-secrets
           readOnly: true
-        - name: dotnet-repo
-          mountPath: /dotnet-repo
-          readOnly: false
         resources:
           {}
           
@@ -294,12 +290,12 @@ spec:
           {}
           
       volumes:
-      - name: dotnet-repo
-        emptyDir:
-          medium: "Disk"
       - name: runner-secrets
         emptyDir:
           medium: "Memory"
+      - name: dotnet-repo
+        emptyDir:
+          medium: "Disk"
       - name: etc-gitlab-runner
         emptyDir:
           medium: "Memory"

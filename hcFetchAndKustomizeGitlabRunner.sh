@@ -2,12 +2,12 @@
 shopt -u extglob; set +H
 
 grantClusterAdminRole() {
-	./k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system michael.roepke@filekeys.com tiller
-	./k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system kube-system:default tiller
-	./k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system default tiller
-	./k8sGrantClusterAdminForServiceAccountOfUser.sh gitlab-runner gitlab-runner:default default
-	./k8sGrantClusterAdminForServiceAccountOfUser.sh gitlab-runner tiller:tiller tiller
-	./k8sGrantClusterAdminForServiceAccountOfUser.sh tiller tiller:tiller tiller
+	k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system michael.roepke@filekeys.com tiller
+	k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system kube-system:default tiller
+	k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system default tiller
+	k8sGrantClusterAdminForServiceAccountOfUser.sh gitlab-runner gitlab-runner:default default
+	k8sGrantClusterAdminForServiceAccountOfUser.sh gitlab-runner tiller:tiller tiller
+	k8sGrantClusterAdminForServiceAccountOfUser.sh tiller tiller:tiller tiller
     
 }
 

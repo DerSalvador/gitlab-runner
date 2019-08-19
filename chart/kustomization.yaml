@@ -6,5 +6,4 @@ patches:
 - target:
     kind: Deployment
     name: gitlab-runner-gitlab-runner
-    labelSelector: "type=deployment"
   path: dotnet-pvc-jsonpatch.yaml

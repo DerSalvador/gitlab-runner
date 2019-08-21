@@ -4,15 +4,19 @@ kubectl config get-contexts
 echo "Current k8s context $(kubectl config current-context)"
 read -p "Want to add gitlab runner to current kubernetes cluster (y/n)? " yesno
 if [ "$yesno" == "y" ]; then
-	kubectl create namespace gitlab-runner
-	./k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system michael.roepke@filekeys.com tiller
-	./k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system kube-system:default tiller
-	./k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system default tiller
-	./k8sGrantClusterAdminForServiceAccountOfUser.sh gitlab-runner gitlab-runner:default default
+    GR_NS=gitlab-runner-dev
+	TILLER_NS=tiller
+	TILLER_SA=tiller
+	kubectl create namespace $GR_NS
+	./k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system michael.roepke@filekeys.com $TILLER_SA
+	./k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system kube-system:default $TILLER_SA
+	./k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system default $TILLER_SA
+	./k8sGrantClusterAdminForServiceAccountOfUser.sh ${GR_NS} ${GR_NS}:default default
 	helm repo add gitlab https://charts.gitlab.io
-	helm init --service-account tiller 
-	helm ls
-    helm upgrade --namespace gitlab-runner -f ./values.yaml gitlab-runner gitlab/gitlab-runner
+	helm init --service-account $TILLER_SA --tiller-namespace $TILLER_NS
+	helm ls --tiller-namespace $TILLER_NS
+    echo helm upgrade --tiller-namespace $TILLER_NS --namespace $GR_NS -f ./values.yaml $GR_NS gitlab/gitlab-runner
+    helm upgrade --install --tiller-namespace $TILLER_NS --namespace $GR_NS -f ./values.yaml $GR_NS gitlab/gitlab-runner
 else
 	echo "No Joy"
 fi

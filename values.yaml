@@ -281,7 +281,26 @@ tolerations: []
 #     value: kubernetes
 
 ## list of hosts and IPs that will be injected into the pod's hosts file
-hostAliases: []
+hostAliases:
+- ip: "10.70.74.26"
+  hostnames:
+  - "qahcembrace.grouphc.net"
+- ip: "10.75.47.249"
+  hostnames:
+  - "hcembrace.grouphc.net"
+- ip: "10.75.49.102"
+  hostnames:
+  - "identityprovider.grouphc.net"
+- ip: "10.77.47.175"
+  hostnames:
+  - "qaidentityprovider.grouphc.net"
+- ip: "10.149.114.92"
+  hostnames:
+  - "ausxdsgdrngq1.grouphc.net"
+- ip: "10.77.100.228"
+  hostnames:
+  - "grpsapdz1.grouphc.net"
+
   # Example:
   # - ip: "127.0.0.1"
   #   hostnames:

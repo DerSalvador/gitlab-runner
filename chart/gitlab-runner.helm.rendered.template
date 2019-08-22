@@ -309,6 +309,26 @@ spec:
       - name: scripts
         configMap:
           name: gitlab-runner-gitlab-runner
+      hostAliases:
+        - hostnames:
+          - qahcembrace.grouphc.net
+          ip: 10.70.74.26
+        - hostnames:
+          - hcembrace.grouphc.net
+          ip: 10.75.47.249
+        - hostnames:
+          - identityprovider.grouphc.net
+          ip: 10.75.49.102
+        - hostnames:
+          - qaidentityprovider.grouphc.net
+          ip: 10.77.47.175
+        - hostnames:
+          - ausxdsgdrngq1.grouphc.net
+          ip: 10.149.114.92
+        - hostnames:
+          - grpsapdz1.grouphc.net
+          ip: 10.77.100.228
+        
 
 ---
 # Source: gitlab-runner/templates/role-binding.yaml

@@ -35,6 +35,7 @@ if ! grep -i resources kustomization.yaml; then
 fi
 kubectl create namespace gitlab-runner
 kubens gitlab-runner 
+echo helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml  gitlab-runner
 helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml  gitlab-runner > $TMPF_TEMPLATE
 sed -i -e "s/release-name/gitlab-runner/g" $TMPF_TEMPLATE
 sed -i -e "s/192.168.99.100/$(minikube ip)/g" $TMPF_TEMPLATE

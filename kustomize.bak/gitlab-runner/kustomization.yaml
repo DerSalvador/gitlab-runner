@@ -1,6 +1,6 @@
 resources:
-  - gitlab-runner.yaml
   - dotnet-repo-pvc.yaml
+  - gitlab-runner.yaml
 
 patches:
 - target:

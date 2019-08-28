@@ -1,0 +1,13 @@
+ [
+#   {"op": "add", "path": "/spec/template/spec/volumes/-", "value": {"emptyDir": { "medium": "Disk"}, "name": "dotnet-repo" } },
+   {"op": "add", "path": "/spec/template/spec/volumes/-", "value": {"persistentVolumeClaim": { "claimName": "dotnet-repo"}, "name": "dotnet-pro" } },
+   {"op": "add", "path": "/spec/template/spec/containers/0/volumeMounts/-", "value": {"mountPath": "/dotnet-repo" ,  "name": "dotnet-pro", "readOnly": "false" } } 
+ ]
+
+ #- op: add
+ # path: /spec/template/spec/volumes
+ # value:
+ #   path: 'emptyDir'
+ #   backend:
+ #     serviceName: my-test
+ #     servicePort: 8081

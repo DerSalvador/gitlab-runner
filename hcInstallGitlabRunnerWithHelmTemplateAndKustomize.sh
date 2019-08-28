@@ -17,12 +17,12 @@ helm init --service-account tiller
 echo Once you have configured GitLab Runner in your values.yml file, run the following:
 helm ls --tiller-namespace default
 
+rm -rf tmp/
 mkdir -p tmp
 TMPF_APPLY=tmp/$(basename $(mktemp tmp.apply.XXXXX))
 rm -f $(basename $TMPF_APPLY)
 TMPF_TEMPLATE=gitlab-runner.helm.rendered.template
 TMPF_KUST=tmp/$(basename $(mktemp tmp.kust.XXXXXX))
-rm -rf tmp/
 rm -f $(basename $TMPF_KUST)
 [ ! -f kustomization.yaml ] && echo "No kustomization.yaml found, creating default one" && touch kustomization.yaml
 if ! grep -i resources kustomization.yaml; then
@@ -35,8 +35,19 @@ if ! grep -i resources kustomization.yaml; then
 fi
 kubectl create namespace gitlab-runner
 kubens gitlab-runner 
-echo helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml  gitlab-runner
-helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml  gitlab-runner > $TMPF_TEMPLATE
+gitlabUrl=$1  # : https://gitlab.hce.heidelbergcement.com/ 
+## The Registration Token for adding new Runners to the GitLab Server. This must
+## be retrieved from your GitLab Instance.
+## ref: https://docs.gitlab.com/ce/ci/runners/README.html
+##
+runnerRegistrationToken=$2 #: "yacAHQ72EdrDi1r-czsr"
+
+if [ ! -z "$gitlabUrl" ]; then
+   overrideSettings="--set gitlabUrl=$gitlabUrl --set runnerRegistrationToken=$runnerRegistrationToken"
+fi
+
+echo helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $overrideSettings gitlab-runner
+helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $:overrideSettings gitlab-runner > $TMPF_TEMPLATE
 sed -i -e "s/release-name/gitlab-runner/g" $TMPF_TEMPLATE
 sed -i -e "s/192.168.99.100/$(minikube ip)/g" $TMPF_TEMPLATE
 kustomize build . > $TMPF_APPLY

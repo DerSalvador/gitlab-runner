@@ -35,6 +35,8 @@ if ! grep -i resources kustomization.yaml; then
 fi
 kubectl create namespace gitlab-runner
 kubens gitlab-runner 
+MINIKUBE_GITLAB_URL=
+MINIKUBE_GITLAB_REGISTRY_TOKEN=
 gitlabUrl=$1  # : https://gitlab.hce.heidelbergcement.com/ 
 ## The Registration Token for adding new Runners to the GitLab Server. This must
 ## be retrieved from your GitLab Instance.
@@ -47,7 +49,7 @@ if [ ! -z "$gitlabUrl" ]; then
 fi
 
 echo helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $overrideSettings gitlab-runner
-helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $:overrideSettings gitlab-runner > $TMPF_TEMPLATE
+helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $overrideSettings gitlab-runner > $TMPF_TEMPLATE
 sed -i -e "s/release-name/gitlab-runner/g" $TMPF_TEMPLATE
 sed -i -e "s/192.168.99.100/$(minikube ip)/g" $TMPF_TEMPLATE
 kustomize build . > $TMPF_APPLY

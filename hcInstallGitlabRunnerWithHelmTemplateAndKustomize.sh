@@ -35,17 +35,16 @@ if ! grep -i resources kustomization.yaml; then
 fi
 kubectl create namespace gitlab-runner
 kubens gitlab-runner 
-MINIKUBE_GITLAB_URL=
-MINIKUBE_GITLAB_REGISTRY_TOKEN=
 gitlabUrl=$1  # : https://gitlab.hce.heidelbergcement.com/ 
 ## The Registration Token for adding new Runners to the GitLab Server. This must
 ## be retrieved from your GitLab Instance.
 ## ref: https://docs.gitlab.com/ce/ci/runners/README.html
 ##
 runnerRegistrationToken=$2 #: "yacAHQ72EdrDi1r-czsr"
+certsSecretName=$3
 
 if [ ! -z "$gitlabUrl" ]; then
-   overrideSettings="--set gitlabUrl=$gitlabUrl --set runnerRegistrationToken=$runnerRegistrationToken"
+   overrideSettings="--set gitlabUrl=$gitlabUrl --set runnerRegistrationToken=$runnerRegistrationToken --set certsSecretName=$certsSecretName"
 fi
 
 echo helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $overrideSettings gitlab-runner

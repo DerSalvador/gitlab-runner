@@ -16,6 +16,10 @@ if [ "$yesno" == "y" ]; then
 	helm init --service-account $TILLER_SA  --tiller-namespace $TILLER_NS
 	helm ls --tiller-namespace $TILLER_NS
 	helm del --purge $GR_NS --tiller-namespace $TILLER_NS
+	for cm in `kubectl -n $GR_NS get cm -oname`; do
+	   echo kubectl -n $GR_NS delete cm $cm
+	   kubectl -n $GR_NS delete cm $cm
+	done
 	helm install --tiller-namespace $TILLER_NS --namespace $GR_NS --name $GR_NS -f ./values.yaml  gitlab/gitlab-runner
 else
 	echo "No Joy"

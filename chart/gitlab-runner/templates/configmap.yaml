@@ -38,15 +38,19 @@ data:
       export CI_SERVER_TOKEN=$(cat /secrets/runner-token)
     fi
 
-    if ! sh /scripts/register-the-runner; then
+    if ! sh /scripts/register-the-runner --user=root; then
       exit 1
     fi
 
     # Start the runner
-    /entrypoint run --user=gitlab-runner \
+    /entrypoint run --user=root \
       --working-directory=/home/gitlab-runner
 
   config.toml: |
+   [[runners]]
+       [runners.kubernetes]
+         [runners.kubernetes.pod_security_context]
+           run_as_non_root = false 
     concurrent = {{ .Values.concurrent }}
     check_interval = {{ .Values.checkInterval }}
     log_level = {{ default "info" .Values.logLevel | quote }}

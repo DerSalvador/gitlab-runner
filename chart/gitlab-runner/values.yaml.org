@@ -5,7 +5,7 @@
 ##
 ## ref: https://hub.docker.com/r/gitlab/gitlab-runner/tags/
 ##
-# image: gitlab/gitlab-runner:alpine-v11.6.0
+image: registry.hce.heidelbergcement.com/hcembrace/tools/isso/gitlab-runner-root:alpine-v11.6.0
 
 ## Specify a imagePullPolicy
 ## 'Always' if imageTag is 'latest', else set to 'IfNotPresent'

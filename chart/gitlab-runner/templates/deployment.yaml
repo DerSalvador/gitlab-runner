@@ -24,6 +24,8 @@ spec:
         {{   $key }}: {{ $value | quote }}
         {{- end }}
     spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       securityContext:
         runAsUser: 100
         fsGroup: 65533

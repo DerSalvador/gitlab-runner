@@ -2,8 +2,10 @@
 shopt -u extglob; set +H
 # kubectx default/console-sand99-emea-hck8s-me:443/michael.roepke@filekeys.com
 # oc login https://console.sand99-emea.hck8s.me:443 --token=B-bKb2nE3GfjSvdqMqyJyj71ITqBB3JOg_mkTOHIla8
-kubectx minikube
-kubectl create namespace gitlab-runner
+CTX=$1{:-minikube}
+kubectx $CTX
+NS=gitlab-runner-dev
+kubectl create namespace $NS
 cd ~/hc/gitlab-runner/chart 
 
 ../k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system michael.roepke@filekeys.com tiller
@@ -33,22 +35,22 @@ if ! grep -i resources kustomization.yaml; then
         echo Using following kustomization.yaml
         cat kustomization.yaml
 fi
-kubectl create namespace gitlab-runner
-kubens gitlab-runner 
-gitlabUrl=$1  # : https://gitlab.hce.heidelbergcement.com/ 
+kubectl create namespace $NS
+kubens $NS
+gitlabUrl=$2  # : https://gitlab.hce.heidelbergcement.com/ 
 ## The Registration Token for adding new Runners to the GitLab Server. This must
 ## be retrieved from your GitLab Instance.
 ## ref: https://docs.gitlab.com/ce/ci/runners/README.html
 ##
-runnerRegistrationToken=$2 #: "yacAHQ72EdrDi1r-czsr"
-certsSecretName=$3
+runnerRegistrationToken=$3 #: "yacAHQ72EdrDi1r-czsr"
+certsSecretName=$4
 
 if [ ! -z "$gitlabUrl" ]; then
    overrideSettings="--set gitlabUrl=$gitlabUrl --set runnerRegistrationToken=$runnerRegistrationToken --set certsSecretName=$certsSecretName"
 fi
 
-echo helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $overrideSettings gitlab-runner
-helm template --namespace gitlab-runner -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $overrideSettings gitlab-runner > $TMPF_TEMPLATE
+echo helm template --namespace $NS -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $overrideSettings gitlab-runner
+helm template --namespace $NS -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $overrideSettings gitlab-runner > $TMPF_TEMPLATE
 sed -i -e "s/release-name/gitlab-runner/g" $TMPF_TEMPLATE
 sed -i -e "s/192.168.99.100/$(minikube ip)/g" $TMPF_TEMPLATE
 kustomize build . > $TMPF_APPLY

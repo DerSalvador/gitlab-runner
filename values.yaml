@@ -300,6 +300,38 @@ hostAliases:
 - ip: "10.77.100.228"
   hostnames:
   - "grpsapdz1.grouphc.net"
+############################
+- ip: 10.70.74.26
+  hostnames:
+  - qahcembrace.grouphc.net
+- ip: 10.75.47.249
+  hostnames:
+  - hcembrace.grouphc.net
+- ip: 10.75.49.102
+  hostnames:
+  - identityprovider.grouphc.net
+- ip: 10.77.47.175
+  hostnames:
+  - qaidentityprovider.grouphc.net
+- ip: 10.149.114.92
+  hostnames:
+  - ausxdsgdrngq1.grouphc.net
+- ip: 10.77.100.228
+  hostnames:
+  - grpsapdz1.grouphc.net
+- ip: 10.145.114.90
+  hostnames:
+  - aussdsingngp1.grouphc.net
+- ip: 10.77.72.15
+  hostnames:
+  - grpsapdz3.grouphc.net
+  - grpxaheids914.grouphc.net
+- ip: 10.230.229.197
+  hostnames:
+  - qanam.identityprovider.grouphc.net
+- ip: 10.230.229.196
+  hostnames:
+  - qanam.hcembrace.grouphc.net
 
   # Example:
   # - ip: "127.0.0.1"

@@ -70,7 +70,7 @@ metadata:
 ---
 apiVersion: v1
 data:
-  runner-registration-token: Rk5vVHMzOHkwNDRoVFNERFpZQ20za3dQZGI5SGNtRFJ1WU1LUERLSDhzNlk2clZEcURIR0RwakxzS29IZmJoeg==
+  runner-registration-token: eWFjQUhRNzJFZHJEaTFyLWN6c3I=
   runner-token: ""
 kind: Secret
 metadata:
@@ -97,7 +97,7 @@ spec:
     metadata:
       annotations:
         checksum/configmap: c0a2bc3dca47b5a3a4f6177d06f7b70757d26f81b11aa5f4f7aa969623679c46
-        checksum/secrets: 8fd20bd22f60652487b130cc6ca446d7bca594a9f077cee3fb90358fe53176e5
+        checksum/secrets: 6c141f75876caff92546b1e72a48eb3b14baa278c7a2d71f42563cd0cdf43e99
         prometheus.io/port: "9252"
         prometheus.io/scrape: "true"
       labels:
@@ -109,7 +109,7 @@ spec:
         - /scripts/entrypoint
         env:
         - name: CI_SERVER_URL
-          value: https://gitlab.192.168.64.231.nip.io/
+          value: https://gitlab.hce.heidelbergcement.com/
         - name: CLONE_URL
           value: ""
         - name: RUNNER_REQUEST_CONCURRENCY
@@ -197,9 +197,6 @@ spec:
           name: etc-gitlab-runner
         - mountPath: /scripts
           name: scripts
-        - mountPath: /home/gitlab-runner/.gitlab-runner/certs/
-          name: custom-certs
-          readOnly: true
         - mountPath: /dotnet-repo
           name: dotnet-pro
           readOnly: false
@@ -228,7 +225,7 @@ spec:
         - /config/configure
         env:
         - name: CI_SERVER_URL
-          value: https://gitlab.192.168.64.231.nip.io/
+          value: https://gitlab.hce.heidelbergcement.com/
         - name: CLONE_URL
           value: ""
         - name: RUNNER_REQUEST_CONCURRENCY
@@ -309,9 +306,6 @@ spec:
               - key: runner-token
                 path: runner-token
               name: gitlab-runner-gitlab-runner
-      - name: custom-certs
-        secret:
-          secretName: gitlab-runner-cert
       - configMap:
           name: gitlab-runner-gitlab-runner
         name: scripts

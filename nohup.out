@@ -48,3 +48,21 @@ Forwarding from [::1]:27017 -> 27017
 Handling connection for 27017
 Handling connection for 27017
 Handling connection for 27017
+E0904 13:10:35.267906   52021 portforward.go:233] lost connection to pod
+* Unmounting /mounted/docker-images-saved ...
+* Unmounting /mounted/docker-images-saved ...
+* Failed unmount: : NewSession: EOF
+X Received terminated signal
+* Failed unmount: : NewSession: read tcp 192.168.64.1:56458->192.168.64.239:22: read: operation timed out
+X Received terminated signal
+Forwarding from [::1]:27017 -> 27017
+* Verifying dashboard health ...
+* Launching proxy ...
+* Verifying proxy health ...
+* Opening http://127.0.0.1:52052/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/ in your default browser...
+Handling connection for 27017
+Handling connection for 27017
+Handling connection for 27017
+Handling connection for 27017
+Handling connection for 27017
+Handling connection for 27017

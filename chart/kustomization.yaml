@@ -1,9 +1,3 @@
 resources:
-  - dotnet-repo-pvc.yaml
   - gitlab-runner.helm.rendered.template
-
-patches:
-- target:
-    kind: Deployment
-    name: gitlab-runner-gitlab-runner
-  path: dotnet-pvc-jsonpatch.yaml
+  - patch-select.yaml

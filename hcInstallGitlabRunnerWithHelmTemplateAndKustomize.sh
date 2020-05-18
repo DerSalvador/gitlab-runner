@@ -2,11 +2,11 @@
 shopt -u extglob; set +H
 # kubectx default/console-sand99-emea-hck8s-me:443/michael.roepke@filekeys.com
 # oc login https://console.sand99-emea.hck8s.me:443 --token=B-bKb2nE3GfjSvdqMqyJyj71ITqBB3JOg_mkTOHIla8
-CTX=$1{:-minikube}
+CTX=${1:-minikube}
 kubectx $CTX
 NS=gitlab-runner-dev
 kubectl create namespace $NS
-cd ~/hc/gitlab-runner/chart 
+cd chart 
 
 ../k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system michael.roepke@filekeys.com tiller
 ../k8sGrantClusterAdminForServiceAccountOfUser.sh kube-system kube-system:default tiller
@@ -49,8 +49,8 @@ if [ ! -z "$gitlabUrl" ]; then
    overrideSettings="--set gitlabUrl=$gitlabUrl --set runnerRegistrationToken=$runnerRegistrationToken --set certsSecretName=$certsSecretName"
 fi
 
-echo helm template --namespace $NS -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $overrideSettings gitlab-runner
-helm template --namespace $NS -f /Users/michaelmellouk/hc/gitlab-runner/values.yaml $overrideSettings gitlab-runner > $TMPF_TEMPLATE
+echo helm template --namespace $NS -f ../values.yaml $overrideSettings gitlab-runner
+helm template --namespace $NS -f ../values.yaml $overrideSettings gitlab-runner > $TMPF_TEMPLATE
 sed -i -e "s/release-name/gitlab-runner/g" $TMPF_TEMPLATE
 sed -i -e "s/192.168.99.100/$(minikube ip)/g" $TMPF_TEMPLATE
 kustomize build . > $TMPF_APPLY

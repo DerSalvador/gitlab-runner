@@ -3,27 +3,27 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: "gitlab-runner-gitlab-runner"
+  name: "brokerme-gitlab-runner"
   labels:
-    app: gitlab-runner-gitlab-runner
+    app: brokerme-gitlab-runner
     chart: gitlab-runner-0.7.0
-    release: "gitlab-runner"
-    heritage: "Tiller"
+    release: "brokerme"
+    heritage: "Helm"
 type: Opaque
 data:
-  runner-registration-token: "eWFjQUhRNzJFZHJEaTFyLWN6c3I="
+  runner-registration-token: "ekRXeGVZZzUyc1I4MXp5MS0yWmY="
   runner-token: ""
 ---
 # Source: gitlab-runner/templates/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gitlab-runner-gitlab-runner
+  name: brokerme-gitlab-runner
   labels:
-    app: gitlab-runner-gitlab-runner
+    app: brokerme-gitlab-runner
     chart: gitlab-runner-0.7.0
-    release: "gitlab-runner"
-    heritage: "Tiller"
+    release: "brokerme"
+    heritage: "Helm"
 data:
   entrypoint: |
     #!/bin/bash
@@ -55,16 +55,20 @@ data:
       export CI_SERVER_TOKEN=$(cat /secrets/runner-token)
     fi
 
-    if ! sh /scripts/register-the-runner; then
+    if ! sh /scripts/register-the-runner --user=root; then
       exit 1
     fi
 
     # Start the runner
-    /entrypoint run --user=gitlab-runner \
+    /entrypoint run --user=root \
       --working-directory=/home/gitlab-runner
 
   config.toml: |
-    concurrent = 10
+   [[runners]]
+       [runners.kubernetes]
+         [runners.kubernetes.pod_security_context]
+           run_as_non_root = false 
+    concurrent = 20
     check_interval = 30
     log_level = "info"
     listen_address = '[::]:9252'
@@ -102,27 +106,29 @@ data:
     else
       exit 1
     fi
-
 ---
 # Source: gitlab-runner/templates/deployment.yaml
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: gitlab-runner-gitlab-runner
+  name: brokerme-gitlab-runner
   labels:
-    app: gitlab-runner-gitlab-runner
+    app: brokerme-gitlab-runner
     chart: gitlab-runner-0.7.0
-    release: "gitlab-runner"
-    heritage: "Tiller"
+    release: "brokerme"
+    heritage: "Helm"
 spec:
-  replicas: 1
+  replicas: 5
+  selector:
+    matchLabels:
+      app: brokerme-gitlab-runner
   template:
     metadata:
       labels:
-        app: gitlab-runner-gitlab-runner
+        app: brokerme-gitlab-runner
       annotations:
-        checksum/configmap: c0a2bc3dca47b5a3a4f6177d06f7b70757d26f81b11aa5f4f7aa969623679c46
-        checksum/secrets: 6c141f75876caff92546b1e72a48eb3b14baa278c7a2d71f42563cd0cdf43e99
+        checksum/configmap: 1c0bda0eaca145313ad927a88ff4e60ea3255db12a59e33dd81ebf9bedb2e063
+        checksum/secrets: f218cb0ea96e3faf600abfd01037d55ba1b79b61aeebaccd7cd05198ea71444f
         prometheus.io/scrape: 'true'
         prometheus.io/port: '9252'
     spec:
@@ -132,11 +138,11 @@ spec:
       initContainers:
       - name: configure
         command: ['sh', '/config/configure']
-        image: gitlab/gitlab-runner:alpine-v12.1.0
+        image: docker.io/brokerme/gitlab-runner-root:latest
         env:
                 
         - name: CI_SERVER_URL
-          value: "https://gitlab.hce.heidelbergcement.com/"
+          value: "https://gitlab.com/"
         - name: CLONE_URL
           value: ""
         - name: RUNNER_REQUEST_CONCURRENCY
@@ -146,7 +152,7 @@ spec:
         - name: REGISTER_LOCKED
           value: "true"
         - name: RUNNER_TAG_LIST
-          value: ""
+          value: "brokerme,brokerme-alpine-11-6-0"
         - name: KUBERNETES_IMAGE
           value: "ubuntu:16.04"
         
@@ -156,31 +162,31 @@ spec:
         - name: KUBERNETES_NAMESPACE
           value: "gitlab-runner"
         - name: KUBERNETES_CPU_LIMIT
-          value: ""
+          value: "400m"
         - name: KUBERNETES_MEMORY_LIMIT
-          value: ""
+          value: "512Mi"
         - name: KUBERNETES_CPU_REQUEST
-          value: ""
+          value: "200m"
         - name: KUBERNETES_MEMORY_REQUEST
-          value: ""
+          value: "512Mi"
         - name: KUBERNETES_SERVICE_ACCOUNT
           value: ""
         - name: KUBERNETES_SERVICE_CPU_LIMIT
-          value: ""
+          value: "400m"
         - name: KUBERNETES_SERVICE_MEMORY_LIMIT
-          value: ""
+          value: "512Mi"
         - name: KUBERNETES_SERVICE_CPU_REQUEST
-          value: ""
+          value: "200m"
         - name: KUBERNETES_SERVICE_MEMORY_REQUEST
-          value: ""
+          value: "512Mi"
         - name: KUBERNETES_HELPER_CPU_LIMIT
-          value: ""
+          value: "400m"
         - name: KUBERNETES_HELPER_MEMORY_LIMIT
-          value: ""
+          value: "512Mi"
         - name: KUBERNETES_HELPER_CPU_REQUEST
-          value: ""
+          value: "200m"
         - name: KUBERNETES_HELPER_MEMORY_REQUEST
-          value: ""
+          value: "256Mi"
         - name: KUBERNETES_HELPER_IMAGE
           value: ""
         - name: KUBERNETES_PULL_POLICY
@@ -196,22 +202,21 @@ spec:
           mountPath: /init-secrets
           readOnly: true
         resources:
-          {}
-          
+          null
       serviceAccountName: ""
       containers:
-      - name: gitlab-runner-gitlab-runner
-        image: gitlab/gitlab-runner:alpine-v12.1.0
+      - name: brokerme-gitlab-runner
+        image: docker.io/brokerme/gitlab-runner-root:latest
         lifecycle:
           preStop:
             exec:
               command: ["gitlab-runner", "unregister", "--all-runners"]
-        imagePullPolicy: "IfNotPresent"
+        imagePullPolicy: "Always"
         command: ["/bin/bash", "/scripts/entrypoint"]
         env:
                 
         - name: CI_SERVER_URL
-          value: "https://gitlab.hce.heidelbergcement.com/"
+          value: "https://gitlab.com/"
         - name: CLONE_URL
           value: ""
         - name: RUNNER_REQUEST_CONCURRENCY
@@ -221,7 +226,7 @@ spec:
         - name: REGISTER_LOCKED
           value: "true"
         - name: RUNNER_TAG_LIST
-          value: ""
+          value: "brokerme,brokerme-alpine-11-6-0"
         - name: KUBERNETES_IMAGE
           value: "ubuntu:16.04"
         
@@ -231,31 +236,31 @@ spec:
         - name: KUBERNETES_NAMESPACE
           value: "gitlab-runner"
         - name: KUBERNETES_CPU_LIMIT
-          value: ""
+          value: "400m"
         - name: KUBERNETES_MEMORY_LIMIT
-          value: ""
+          value: "512Mi"
         - name: KUBERNETES_CPU_REQUEST
-          value: ""
+          value: "200m"
         - name: KUBERNETES_MEMORY_REQUEST
-          value: ""
+          value: "512Mi"
         - name: KUBERNETES_SERVICE_ACCOUNT
           value: ""
         - name: KUBERNETES_SERVICE_CPU_LIMIT
-          value: ""
+          value: "400m"
         - name: KUBERNETES_SERVICE_MEMORY_LIMIT
-          value: ""
+          value: "512Mi"
         - name: KUBERNETES_SERVICE_CPU_REQUEST
-          value: ""
+          value: "200m"
         - name: KUBERNETES_SERVICE_MEMORY_REQUEST
-          value: ""
+          value: "512Mi"
         - name: KUBERNETES_HELPER_CPU_LIMIT
-          value: ""
+          value: "400m"
         - name: KUBERNETES_HELPER_MEMORY_LIMIT
-          value: ""
+          value: "512Mi"
         - name: KUBERNETES_HELPER_CPU_REQUEST
-          value: ""
+          value: "200m"
         - name: KUBERNETES_HELPER_MEMORY_REQUEST
-          value: ""
+          value: "256Mi"
         - name: KUBERNETES_HELPER_IMAGE
           value: ""
         - name: KUBERNETES_PULL_POLICY
@@ -280,6 +285,8 @@ spec:
         - name: metrics
           containerPort: 9252
         volumeMounts:
+        - name: dockersock
+          mountPath: "/var/run/docker.sock"
         - name: runner-secrets
           mountPath: /secrets
         - name: etc-gitlab-runner
@@ -287,9 +294,11 @@ spec:
         - name: scripts
           mountPath: /scripts
         resources:
-          {}
-          
+          null
       volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
       - name: runner-secrets
         emptyDir:
           medium: "Memory"
@@ -300,7 +309,7 @@ spec:
         projected:
           sources:
             - secret:
-                name: "gitlab-runner-gitlab-runner"
+                name: "brokerme-gitlab-runner"
                 items:
                   - key: runner-registration-token
                     path: runner-registration-token
@@ -308,34 +317,4 @@ spec:
                     path: runner-token
       - name: scripts
         configMap:
-          name: gitlab-runner-gitlab-runner
-      hostAliases:
-        - hostnames:
-          - qahcembrace.grouphc.net
-          ip: 10.70.74.26
-        - hostnames:
-          - hcembrace.grouphc.net
-          ip: 10.75.47.249
-        - hostnames:
-          - identityprovider.grouphc.net
-          ip: 10.75.49.102
-        - hostnames:
-          - qaidentityprovider.grouphc.net
-          ip: 10.77.47.175
-        - hostnames:
-          - ausxdsgdrngq1.grouphc.net
-          ip: 10.149.114.92
-        - hostnames:
-          - grpsapdz1.grouphc.net
-          ip: 10.77.100.228
-        
-
----
-# Source: gitlab-runner/templates/role-binding.yaml
-
----
-# Source: gitlab-runner/templates/role.yaml
-
----
-# Source: gitlab-runner/templates/service-account.yaml
-
+          name: brokerme-gitlab-runner

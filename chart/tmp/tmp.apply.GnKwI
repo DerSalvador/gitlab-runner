@@ -9,11 +9,9 @@ data:
     else
       exit 1
     fi
-  config.toml: |
-    concurrent = 10
-    check_interval = 30
-    log_level = "info"
-    listen_address = '[::]:9252'
+  config.toml: "[[runners]]\n    [runners.kubernetes]\n      [runners.kubernetes.pod_security_context]\n
+    \       run_as_non_root = false \n concurrent = 10\n check_interval = 30\n log_level
+    = \"info\"\n listen_address = '[::]:9252'\n"
   configure: |
     set -e
     cp /init-secrets/* /secrets
@@ -47,12 +45,12 @@ data:
       export CI_SERVER_TOKEN=$(cat /secrets/runner-token)
     fi
 
-    if ! sh /scripts/register-the-runner; then
+    if ! sh /scripts/register-the-runner --user=root; then
       exit 1
     fi
 
     # Start the runner
-    /entrypoint run --user=gitlab-runner \
+    /entrypoint run --user=root \
       --working-directory=/home/gitlab-runner
   register-the-runner: "#!/bin/bash\nMAX_REGISTER_ATTEMPTS=30\n\nfor i in $(seq 1
     \"${MAX_REGISTER_ATTEMPTS}\"); do\n  echo \"Registration attempt ${i} of ${MAX_REGISTER_ATTEMPTS}\"\n
@@ -62,46 +60,49 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    app: gitlab-runner-gitlab-runner
+    app: brokerme-gitlab-runner
     chart: gitlab-runner-0.7.0
-    heritage: Tiller
-    release: gitlab-runner
-  name: gitlab-runner-gitlab-runner
+    heritage: Helm
+    release: brokerme
+  name: brokerme-gitlab-runner
 ---
 apiVersion: v1
 data:
-  runner-registration-token: eWFjQUhRNzJFZHJEaTFyLWN6c3I=
+  runner-registration-token: ekRXeGVZZzUyc1I4MXp5MS0yWmY=
   runner-token: ""
 kind: Secret
 metadata:
   labels:
-    app: gitlab-runner-gitlab-runner
+    app: brokerme-gitlab-runner
     chart: gitlab-runner-0.7.0
-    heritage: Tiller
-    release: gitlab-runner
-  name: gitlab-runner-gitlab-runner
+    heritage: Helm
+    release: brokerme
+  name: brokerme-gitlab-runner
 type: Opaque
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: gitlab-runner-gitlab-runner
+    app: brokerme-gitlab-runner
     chart: gitlab-runner-0.7.0
-    heritage: Tiller
-    release: gitlab-runner
-  name: gitlab-runner-gitlab-runner
+    heritage: Helm
+    release: brokerme
+  name: brokerme-gitlab-runner
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: brokerme-gitlab-runner
   template:
     metadata:
       annotations:
-        checksum/configmap: c0a2bc3dca47b5a3a4f6177d06f7b70757d26f81b11aa5f4f7aa969623679c46
-        checksum/secrets: 6c141f75876caff92546b1e72a48eb3b14baa278c7a2d71f42563cd0cdf43e99
+        checksum/configmap: a02a3add6575387156399242635ea9ef6d651dea93073652ee7cf6e6684f5d7e
+        checksum/secrets: f218cb0ea96e3faf600abfd01037d55ba1b79b61aeebaccd7cd05198ea71444f
         prometheus.io/port: "9252"
         prometheus.io/scrape: "true"
       labels:
-        app: gitlab-runner-gitlab-runner
+        app: brokerme-gitlab-runner
     spec:
       containers:
       - command:
@@ -109,7 +110,7 @@ spec:
         - /scripts/entrypoint
         env:
         - name: CI_SERVER_URL
-          value: https://gitlab.hce.heidelbergcement.com/
+          value: https://gitlab.com/
         - name: CLONE_URL
           value: ""
         - name: RUNNER_REQUEST_CONCURRENCY
@@ -156,8 +157,8 @@ spec:
           value: ""
         - name: KUBERNETES_PULL_POLICY
           value: ""
-        image: gitlab/gitlab-runner:alpine-v12.1.0
-        imagePullPolicy: IfNotPresent
+        image: docker.io/brokerme/gitlab-runner-root:latest
+        imagePullPolicy: Always
         lifecycle:
           preStop:
             exec:
@@ -175,7 +176,7 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
-        name: gitlab-runner-gitlab-runner
+        name: brokerme-gitlab-runner
         ports:
         - containerPort: 9252
           name: metrics
@@ -197,35 +198,13 @@ spec:
           name: etc-gitlab-runner
         - mountPath: /scripts
           name: scripts
-        - mountPath: /dotnet-repo
-          name: dotnet-pro
-          readOnly: false
-      hostAliases:
-      - hostnames:
-        - qahcembrace.grouphc.net
-        ip: 10.70.74.26
-      - hostnames:
-        - hcembrace.grouphc.net
-        ip: 10.75.47.249
-      - hostnames:
-        - identityprovider.grouphc.net
-        ip: 10.75.49.102
-      - hostnames:
-        - qaidentityprovider.grouphc.net
-        ip: 10.77.47.175
-      - hostnames:
-        - ausxdsgdrngq1.grouphc.net
-        ip: 10.149.114.92
-      - hostnames:
-        - grpsapdz1.grouphc.net
-        ip: 10.77.100.228
       initContainers:
       - command:
         - sh
         - /config/configure
         env:
         - name: CI_SERVER_URL
-          value: https://gitlab.hce.heidelbergcement.com/
+          value: https://gitlab.com/
         - name: CLONE_URL
           value: ""
         - name: RUNNER_REQUEST_CONCURRENCY
@@ -272,7 +251,7 @@ spec:
           value: ""
         - name: KUBERNETES_PULL_POLICY
           value: ""
-        image: gitlab/gitlab-runner:alpine-v12.1.0
+        image: docker.io/brokerme/gitlab-runner-root:latest
         name: configure
         resources: {}
         volumeMounts:
@@ -305,23 +284,15 @@ spec:
                 path: runner-registration-token
               - key: runner-token
                 path: runner-token
-              name: gitlab-runner-gitlab-runner
+              name: brokerme-gitlab-runner
       - configMap:
-          name: gitlab-runner-gitlab-runner
+          name: brokerme-gitlab-runner
         name: scripts
-      - name: dotnet-pro
-        persistentVolumeClaim:
-          claimName: dotnet-repo
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
+kind: Deployment
 metadata:
-  name: dotnet-repo
+  name: brokerme-gitlab-runner
 spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1000M
-  storageClassName: standard
-  volumeMode: Filesystem
+  selector:
+    matchLabels:
+      app: brokerme-gitlab-runner

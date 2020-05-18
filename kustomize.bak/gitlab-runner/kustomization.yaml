@@ -1,9 +1,0 @@
-resources:
-  - dotnet-repo-pvc.yaml
-  - gitlab-runner.yaml
-
-patches:
-- target:
-    kind: Deployment
-    name: gitlab-runner-gitlab-runner
-  path: dotnet-pvc-jsonpatch.yaml

@@ -8,7 +8,10 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  replicas: 1
+  replicas: 5
+  selector:
+    matchLabels:
+      app: {{ include "gitlab-runner.fullname" . }}
   template:
     metadata:
       labels:
@@ -79,6 +82,8 @@ spec:
         - name: metrics
           containerPort: 9252
         volumeMounts:
+        - name: dockersock
+          mountPath: "/var/run/docker.sock"
         - name: runner-secrets
           mountPath: /secrets
         - name: etc-gitlab-runner
@@ -93,6 +98,9 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
       - name: runner-secrets
         emptyDir:
           medium: "Memory"

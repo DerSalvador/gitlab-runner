@@ -17,13 +17,13 @@ imagePullPolicy: Always
 ## The GitLab Server URL (with protocol) that want to register the runner against
 ## ref: https://docs.gitlab.com/runner/commands/README.html#gitlab-runner-register
 ##
-gitlabUrl: https://gitlab.hce.heidelbergcement.com/ 
+gitlabUrl: https://gitlab.com/
 
 ## The Registration Token for adding new Runners to the GitLab Server. This must
 ## be retrieved from your GitLab Instance.
 ## ref: https://docs.gitlab.com/ce/ci/runners/README.html
 ##
-runnerRegistrationToken: "yacAHQ72EdrDi1r-czsr"
+runnerRegistrationToken: "zDWxeYg52sR81zy1-2Zf"
 
 ## The Runner Token for adding new Runners to the GitLab Server. This must
 ## be retrieved from your GitLab Instance. It is token of already registered runner.
@@ -50,7 +50,7 @@ unregisterRunners: true
 ## Configure the maximum number of concurrent jobs
 ## ref: https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-global-section
 ##
-concurrent: 10
+concurrent: 20
 
 ## Defines in seconds how often to check GitLab for a new builds
 ## ref: https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-global-section
@@ -112,7 +112,7 @@ runners:
   ##
   ## ref: https://docs.gitlab.com/ce/ci/runners/#using-tags
   ##
-  # tags: ""
+  tags: "brokerme,brokerme-alpine-11-6-0"
 
   ## Run all containers with the privileged flag enabled
   ## This will allow the docker:dind image to run if you need to run Docker
@@ -183,27 +183,27 @@ runners:
 
   ## Build Container specific configuration
   ##
-  builds: {}
-    # cpuLimit: 200m
-    # memoryLimit: 256Mi
-    # cpuRequests: 100m
-    # memoryRequests: 128Mi
+  builds: 
+    cpuLimit: 400m
+    memoryLimit: 512Mi
+    cpuRequests: 200m
+    memoryRequests: 512Mi
 
   ## Service Container specific configuration
   ##
-  services: {}
-    # cpuLimit: 200m
-    # memoryLimit: 256Mi
-    # cpuRequests: 100m
-    # memoryRequests: 128Mi
+  services: 
+    cpuLimit: 400m
+    memoryLimit: 512Mi
+    cpuRequests: 200m
+    memoryRequests: 512Mi
 
   ## Helper Container specific configuration
   ##
-  helpers: {}
-    # cpuLimit: 200m
-    # memoryLimit: 256Mi
-    # cpuRequests: 100m
-    # memoryRequests: 128Mi
+  helpers: 
+    cpuLimit: 400m
+    memoryLimit: 512Mi
+    cpuRequests: 200m
+    memoryRequests: 256Mi
     # image: gitlab/gitlab-runner-helper:x86_64-latest
 
   ## Service Account to be used for runners
@@ -242,13 +242,13 @@ runners:
 ## Configure resource requests and limits
 ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
 ##
-resources: {}
-  # limits:
-  #   memory: 256Mi
-  #   cpu: 200m
-  # requests:
-  #   memory: 128Mi
-  #   cpu: 100m
+  resources: 
+    limits:
+      memory: 512Mi
+      cpu: 400m
+    requests:
+      memory: 256Mi
+      cpu: 200m
 
 ## Affinity for pod assignment
 ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -261,7 +261,7 @@ affinity: {}
 nodeSelector: {}
   # Example: The gitlab runner manager should not run on spot instances so you can assign
   # them to the regular worker nodes only.
-  # node-role.kubernetes.io/worker: "true"
+node-role.kubernetes.io/worker: "true"
 
 ## List of node taints to tolerate (requires Kubernetes >= 1.6)
 ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
@@ -282,57 +282,57 @@ tolerations: []
 #     value: kubernetes
 
 ## list of hosts and IPs that will be injected into the pod's hosts file
-hostAliases:
-- ip: "10.70.74.26"
-  hostnames:
-  - "qahcembrace.grouphc.net"
-- ip: "10.75.47.249"
-  hostnames:
-  - "hcembrace.grouphc.net"
-- ip: "10.75.49.102"
-  hostnames:
-  - "identityprovider.grouphc.net"
-- ip: "10.77.47.175"
-  hostnames:
-  - "qaidentityprovider.grouphc.net"
-- ip: "10.149.114.92"
-  hostnames:
-  - "ausxdsgdrngq1.grouphc.net"
-- ip: "10.77.100.228"
-  hostnames:
-  - "grpsapdz1.grouphc.net"
+# hostAliases:
+# - ip: "10.70.74.26"
+#   hostnames:
+#   - "qahcembrace.grouphc.net"
+# - ip: "10.75.47.249"
+#   hostnames:
+#   - "hcembrace.grouphc.net"
+# - ip: "10.75.49.102"
+#   hostnames:
+#   - "identityprovider.grouphc.net"
+# - ip: "10.77.47.175"
+#   hostnames:
+#   - "qaidentityprovider.grouphc.net"
+# - ip: "10.149.114.92"
+#   hostnames:
+#   - "ausxdsgdrngq1.grouphc.net"
+# - ip: "10.77.100.228"
+#   hostnames:
+#   - "grpsapdz1.grouphc.net"
 ############################
-- ip: 10.70.74.26
-  hostnames:
-  - qahcembrace.grouphc.net
-- ip: 10.75.47.249
-  hostnames:
-  - hcembrace.grouphc.net
-- ip: 10.75.49.102
-  hostnames:
-  - identityprovider.grouphc.net
-- ip: 10.77.47.175
-  hostnames:
-  - qaidentityprovider.grouphc.net
-- ip: 10.149.114.92
-  hostnames:
-  - ausxdsgdrngq1.grouphc.net
-- ip: 10.77.100.228
-  hostnames:
-  - grpsapdz1.grouphc.net
-- ip: 10.145.114.90
-  hostnames:
-  - aussdsingngp1.grouphc.net
-- ip: 10.77.72.15
-  hostnames:
-  - grpsapdz3.grouphc.net
-  - grpxaheids914.grouphc.net
-- ip: 10.230.229.197
-  hostnames:
-  - qanam.identityprovider.grouphc.net
-- ip: 10.230.229.196
-  hostnames:
-  - qanam.hcembrace.grouphc.net
+# - ip: 10.70.74.26
+#   hostnames:
+#   - qahcembrace.grouphc.net
+# - ip: 10.75.47.249
+#   hostnames:
+#   - hcembrace.grouphc.net
+# - ip: 10.75.49.102
+#   hostnames:
+#   - identityprovider.grouphc.net
+# - ip: 10.77.47.175
+#   hostnames:
+#   - qaidentityprovider.grouphc.net
+# - ip: 10.149.114.92
+#   hostnames:
+#   - ausxdsgdrngq1.grouphc.net
+# - ip: 10.77.100.228
+#   hostnames:
+#   - grpsapdz1.grouphc.net
+# - ip: 10.145.114.90
+#   hostnames:
+#   - aussdsingngp1.grouphc.net
+# - ip: 10.77.72.15
+#   hostnames:
+#   - grpsapdz3.grouphc.net
+#   - grpxaheids914.grouphc.net
+# - ip: 10.230.229.197
+#   hostnames:
+#   - qanam.identityprovider.grouphc.net
+# - ip: 10.230.229.196
+#   hostnames:
+#   - qanam.hcembrace.grouphc.net
 
   # Example:
   # - ip: "127.0.0.1"

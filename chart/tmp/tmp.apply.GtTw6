@@ -1,7 +1,0 @@
-kind: Deployment
-metadata:
-  name: brokerme-gitlab-runner
-spec:
-  selector:
-    matchLabels:
-      app: brokerme-gitlab-runner

@@ -185,25 +185,25 @@ runners:
   ##
   builds: 
     cpuLimit: 400m
-    memoryLimit: 512Mi
-    cpuRequests: 200m
-    memoryRequests: 512Mi
+    memoryLimit: 1024Mi
+    cpuRequests: 300m
+    memoryRequests: 1024Mi
 
   ## Service Container specific configuration
   ##
   services: 
     cpuLimit: 400m
-    memoryLimit: 512Mi
-    cpuRequests: 200m
-    memoryRequests: 512Mi
+    memoryLimit: 1024Mi
+    cpuRequests: 300m
+    memoryRequests: 1024Mi
 
   ## Helper Container specific configuration
   ##
   helpers: 
     cpuLimit: 400m
-    memoryLimit: 512Mi
-    cpuRequests: 200m
-    memoryRequests: 256Mi
+    memoryLimit: 1024Mi
+    cpuRequests: 300m
+    memoryRequests: 512Mi
     # image: gitlab/gitlab-runner-helper:x86_64-latest
 
   ## Service Account to be used for runners
@@ -244,11 +244,11 @@ runners:
 ##
   resources: 
     limits:
-      memory: 512Mi
-      cpu: 400m
+      memory: 2048Mi
+      cpu: 500m
     requests:
-      memory: 256Mi
-      cpu: 200m
+      memory: 1024Mi
+      cpu: 300m
 
 ## Affinity for pod assignment
 ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity

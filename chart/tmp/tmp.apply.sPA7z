@@ -10,7 +10,7 @@ data:
       exit 1
     fi
   config.toml: "[[runners]]\n    [runners.kubernetes]\n      [runners.kubernetes.pod_security_context]\n
-    \       run_as_non_root = false \n concurrent = 10\n check_interval = 30\n log_level
+    \       run_as_non_root = false \n concurrent = 20\n check_interval = 30\n log_level
     = \"info\"\n listen_address = '[::]:9252'\n"
   configure: |
     set -e
@@ -90,14 +90,14 @@ metadata:
     release: brokerme
   name: brokerme-gitlab-runner
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       app: brokerme-gitlab-runner
   template:
     metadata:
       annotations:
-        checksum/configmap: a02a3add6575387156399242635ea9ef6d651dea93073652ee7cf6e6684f5d7e
+        checksum/configmap: 1c0bda0eaca145313ad927a88ff4e60ea3255db12a59e33dd81ebf9bedb2e063
         checksum/secrets: f218cb0ea96e3faf600abfd01037d55ba1b79b61aeebaccd7cd05198ea71444f
         prometheus.io/port: "9252"
         prometheus.io/scrape: "true"
@@ -128,31 +128,31 @@ spec:
         - name: KUBERNETES_NAMESPACE
           value: gitlab-runner
         - name: KUBERNETES_CPU_LIMIT
-          value: ""
+          value: 400m
         - name: KUBERNETES_MEMORY_LIMIT
-          value: ""
+          value: 1024Mi
         - name: KUBERNETES_CPU_REQUEST
-          value: ""
+          value: 300m
         - name: KUBERNETES_MEMORY_REQUEST
-          value: ""
+          value: 1024Mi
         - name: KUBERNETES_SERVICE_ACCOUNT
           value: ""
         - name: KUBERNETES_SERVICE_CPU_LIMIT
-          value: ""
+          value: 400m
         - name: KUBERNETES_SERVICE_MEMORY_LIMIT
-          value: ""
+          value: 1024Mi
         - name: KUBERNETES_SERVICE_CPU_REQUEST
-          value: ""
+          value: 300m
         - name: KUBERNETES_SERVICE_MEMORY_REQUEST
-          value: ""
+          value: 1024Mi
         - name: KUBERNETES_HELPER_CPU_LIMIT
-          value: ""
+          value: 400m
         - name: KUBERNETES_HELPER_MEMORY_LIMIT
-          value: ""
+          value: 1024Mi
         - name: KUBERNETES_HELPER_CPU_REQUEST
-          value: ""
+          value: 300m
         - name: KUBERNETES_HELPER_MEMORY_REQUEST
-          value: ""
+          value: 512Mi
         - name: KUBERNETES_HELPER_IMAGE
           value: ""
         - name: KUBERNETES_PULL_POLICY
@@ -190,7 +190,7 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
-        resources: {}
+        resources: null
         volumeMounts:
         - mountPath: /var/run/docker.sock
           name: dockersock
@@ -224,38 +224,38 @@ spec:
         - name: KUBERNETES_NAMESPACE
           value: gitlab-runner
         - name: KUBERNETES_CPU_LIMIT
-          value: ""
+          value: 400m
         - name: KUBERNETES_MEMORY_LIMIT
-          value: ""
+          value: 1024Mi
         - name: KUBERNETES_CPU_REQUEST
-          value: ""
+          value: 300m
         - name: KUBERNETES_MEMORY_REQUEST
-          value: ""
+          value: 1024Mi
         - name: KUBERNETES_SERVICE_ACCOUNT
           value: ""
         - name: KUBERNETES_SERVICE_CPU_LIMIT
-          value: ""
+          value: 400m
         - name: KUBERNETES_SERVICE_MEMORY_LIMIT
-          value: ""
+          value: 1024Mi
         - name: KUBERNETES_SERVICE_CPU_REQUEST
-          value: ""
+          value: 300m
         - name: KUBERNETES_SERVICE_MEMORY_REQUEST
-          value: ""
+          value: 1024Mi
         - name: KUBERNETES_HELPER_CPU_LIMIT
-          value: ""
+          value: 400m
         - name: KUBERNETES_HELPER_MEMORY_LIMIT
-          value: ""
+          value: 1024Mi
         - name: KUBERNETES_HELPER_CPU_REQUEST
-          value: ""
+          value: 300m
         - name: KUBERNETES_HELPER_MEMORY_REQUEST
-          value: ""
+          value: 512Mi
         - name: KUBERNETES_HELPER_IMAGE
           value: ""
         - name: KUBERNETES_PULL_POLICY
           value: ""
         image: docker.io/brokerme/gitlab-runner-root:latest
         name: configure
-        resources: {}
+        resources: null
         volumeMounts:
         - mountPath: /secrets
           name: runner-secrets
@@ -293,11 +293,3 @@ spec:
       - configMap:
           name: brokerme-gitlab-runner
         name: scripts
----
-kind: Deployment
-metadata:
-  name: brokerme-gitlab-runner
-spec:
-  selector:
-    matchLabels:
-      app: brokerme-gitlab-runner
